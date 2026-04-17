@@ -1,51 +1,108 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Student Records Viewer</title>
 </head>
 <body>
-    <h1>Students</h1>
-    <button onclick="loadStudents()">Display Students</button>
-    <ul id="list"></ul>
 
-    <h1>Add Student</h1>
-    <input id="name" type="text" name="name" placeholder="name">
-    <input id="yearLevel" type="number" name="yearLevel" placeholder="yearLevel">
-    <button onclick="addStudent()">Submit</button>
-    
-</body>
+<h1>Student Records Viewer</h1>
+
+<button onclick="loadStudents()">Display Students</button>
+<ul id="list"></ul>
+
+<hr>
+
+<h2>Add Student</h2>
+<input id="name" type="text" placeholder="Name">
+<input id="yearLevel" type="number" placeholder="Year Level">
+<button onclick="addStudent()">Add Student</button>
+
+<hr>
+
+<h2>Update Student</h2>
+<input id="updateId" type="number" placeholder="Student ID">
+<input id="updateName" type="text" placeholder="New Name">
+<input id="updateYearLevel" type="number" placeholder="New Year Level">
+<button onclick="updateStudent()">Update Student</button>
+
+<hr>
+
+<h2>Delete Student</h2>
+<input id="deleteId" type="number" placeholder="Student ID">
+<button onclick="deleteStudent()">Delete Student</button>
+
+<hr>
+
+<h2>Search Student</h2>
+<input id="searchName" type="text" placeholder="Student Name">
+<button onclick="searchStudent()">Search</button>
+
 <script>
-    async function loadStudents() {
-        const res = await fetch('http://localhost:3000/api/students')
-        const data = await res.json()
+async function loadStudents() {
+    const res = await fetch('/api/students');
+    const data = await res.json();
+    displayStudents(data);
+}
 
-        const list = document.getElementById('list')
-        list.innerHTML = ''
+function displayStudents(data) {
+    const list = document.getElementById('list');
+    list.innerHTML = '';
 
-        data.forEach( (student) => {
-            const li = document.createElement('li')
-            li.textContent = `NAME: ${student.name} \n YEAR LEVEL: ${student.yearLevel}`
-            list.appendChild(li)
-        })
-    }
+    data.forEach(student => {
+        const li = document.createElement('li');
+        li.textContent = `ID: ${student.id} | Name: ${student.name} | Year Level: ${student.yearLevel}`;
+        list.appendChild(li);
+    });
+}
 
-    async function addStudent(){
-        const name = document.getElementById('name').value
-        const yearLevel = document.getElementById('yearLevel').value
-        const res = await fetch('http://localhost:3000/api/students',
-        {
+async function addStudent() {
+    const name = document.getElementById('name').value;
+    const yearLevel = document.getElementById('yearLevel').value;
+
+    await fetch('/api/students', {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({name,yearLevel})  
-        })
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, yearLevel })
+    });
 
-        const data = await res.json()
-        console.log(data)
-        loadStudents()
-    }
+    loadStudents();
+}
+
+async function updateStudent() {
+    const id = document.getElementById('updateId').value;
+    const name = document.getElementById('updateName').value;
+    const yearLevel = document.getElementById('updateYearLevel').value;
+
+    await fetch(`/api/students/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, yearLevel })
+    });
+
+    loadStudents();
+}
+
+async function deleteStudent() {
+    const id = document.getElementById('deleteId').value;
+
+    await fetch(`/api/students/${id}`, {
+        method: 'DELETE'
+    });
+
+    loadStudents();
+}
+
+async function searchStudent() {
+    const name = document.getElementById('searchName').value;
+
+    const res = await fetch(`/api/students/search/${name}`);
+    const data = await res.json();
+
+    displayStudents(data);
+}
 </script>
+
+</body>
 </html>
